@@ -1,0 +1,135 @@
+// API
+const String kBaseUrl = String.fromEnvironment("API_BASE_URL", defaultValue: "http://localhost:8080");
+// ignore: prefer_interpolation_to_compose_strings
+const String kApiBaseUrl = String.fromEnvironment("API_BASE_URL", defaultValue: "http://localhost:8080") + "/query";
+// ignore: prefer_interpolation_to_compose_strings
+const String kWebSocketUrl = String.fromEnvironment("API_WS_BASE_URL", defaultValue: "ws://localhost:8080") + "/query";
+
+// Specialities (in french)
+const List<String> kSpecialities = [
+  "Africain",
+  "Américain",
+  "Asiatique",
+  "Barbecue",
+  "Bistrot",
+  "Brasserie",
+  "Café",
+  "Caraïbes",
+  "Chinois",
+  "Crêperie",
+  "Cubain",
+  "Espagnol",
+  "Français",
+  "Fruits de mer",
+  "Gastronomique",
+  "Grec",
+  "Grillades",
+  "Indien",
+  "Italien",
+  "Japonais",
+  "Libanais",
+  "Marocain",
+  "Méditerranéen",
+  "Mexicain",
+  "Oriental",
+  "Pizzeria",
+  "Portugais",
+  "Russe",
+  "Salon de thé",
+  "Sud-américain",
+  "Sushi",
+  "Tapas",
+  "Thaïlandais",
+  "Turc",
+  "Végétarien",
+  "Vietnamien",
+  "Viandes",
+  "Volailles",
+  "Wok",
+  "Yakitori",
+  "Yum cha",
+  "Zinguerie",
+  "Zoo",
+  "Zythologie",
+];
+
+const List<String> kVolumeUnits = [
+  "cl",
+  "ml",
+  "L",
+  "oz",
+  "pt",
+  "qt",
+  "gal",
+];
+
+// Currencies
+const Map<String, String> kCurrencies = {
+  "usd": "USD (\$)",
+  "eur": "EUR (€)",
+  "gbp": "GBP (£)",
+  "jpy": "JPY (¥)",
+  "cny": "CNY (¥)",
+  "rub": "RUB (₽)",
+  "inr": "INR (₹)",
+  "brl": "BRL (R\$)",
+  "cad": "CAD (\$)",
+  "aud": "AUD (\$)",
+  "chf": "CHF (CHF)",
+  "sek": "SEK (kr)",
+  "nok": "NOK (kr)",
+  "dkk": "DKK (kr)",
+  "czk": "CZK (Kč)",
+  "huf": "HUF (Ft)",
+  "pln": "PLN (zł)",
+  "try": "TRY (₺)",
+  "ils": "ILS (₪)",
+  "aed": "AED (د.إ)",
+  "sar": "SAR (ر.س)",
+  "qar": "QAR (ر.ق)",
+  "omr": "OMR (ر.ع.)",
+  "kwd": "KWD (د.ك)",
+  "bhd": "BHD (د.ب)",
+  "jod": "JOD (د.ا)",
+  "egp": "EGP (ج.م)",
+  "myr": "MYR (RM)",
+  "idr": "IDR (Rp)",
+  "php": "PHP (₱)",
+  "sgd": "SGD (\$)",
+  "thb": "THB (฿)",
+  "vnd": "VND (₫)",
+  "krw": "KRW (₩)",
+  "nzd": "NZD (\$)",
+  "mxn": "MXN (\$)",
+  "ars": "ARS (\$)",
+  "cop": "COP (\$)",
+};
+
+const List<String> kCourseCategories = [
+  "Entrée",
+  "Plat",
+  "Dessert",
+];
+
+const List<String> kDrinkTypes = [
+  "Sans alcool",
+  "Alcoolisée",
+  "Chaude",
+  "Froide",
+];
+
+const List<String> kDrinkCategories = [
+  "Eau",
+  "Soda",
+  "Jus de fruits",
+  "Café",
+  "Thé",
+  "Vin rouge",
+  "Vin blanc",
+  "Vin rosé",
+  "Champagne",
+  "Bière",
+  "Cocktail",
+  "Spiritueux",
+  "Apéritif",
+];

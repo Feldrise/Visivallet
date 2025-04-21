@@ -4,19 +4,25 @@ import 'package:visivallet/core/providers.dart';
 import 'package:visivallet/core/widgets/shimmers/square_shimmer.dart';
 import 'package:visivallet/features/contacts/add_contact_page/add_contact_page.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
-import 'package:visivallet/features/contacts/widgets/contact_card.dart';
+import 'package:visivallet/features/contacts/widgets/contacts_list.dart';
 import 'package:visivallet/features/event/models/event/event.dart';
 import 'package:visivallet/theme/screen_helper.dart';
 
-class EventPage extends ConsumerWidget {
+class EventPage extends ConsumerStatefulWidget {
   final int eventId;
 
   const EventPage({super.key, required this.eventId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final eventState = ref.watch(eventProvider(eventId));
-    final contactsState = ref.watch(eventContactsProvider(eventId));
+  ConsumerState<EventPage> createState() => _EventPageState();
+}
+
+class _EventPageState extends ConsumerState<EventPage> {
+  String _searchQuery = "";
+
+  @override
+  Widget build(BuildContext context) {
+    final eventState = ref.watch(eventProvider(widget.eventId));
 
     if (eventState.isLoading) {
       return Scaffold(
@@ -55,45 +61,33 @@ class EventPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(event.name),
       ),
-      body: Builder(builder: (context) {
-        if (contactsState.isLoading) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (int i = 0; i < 5; i++) ...[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: ScreenHelper.instance.horizontalPadding, vertical: 8),
-                  child: const SquareShimmer(height: 80),
-                ),
-              ],
-            ],
-          );
-        }
-
-        if (contactsState.hasError) {
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: ScreenHelper.instance.horizontalPadding, vertical: 8),
-            child: Center(
-              child: Text(
-                "Une erreur est survenue : ${contactsState.error}",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: ScreenHelper.instance.horizontalPadding,
+              vertical: 8,
             ),
-          );
-        }
-
-        final List<Contact> contacts = contactsState.value ?? [];
-
-        return ListView(
-          children: [
-            for (final contact in contacts) ...[
-              ContactCard(contact: contact),
-              const SizedBox(height: 8),
-            ]
-          ],
-        );
-      }),
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: "Rechercher un contact",
+                hintText: "Nom, prénom, numéro de téléphone ou email",
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (value) => setState(() {
+                _searchQuery = value;
+              }),
+            ),
+          ),
+          Expanded(
+            child: ContactsList(
+              event: event,
+              searchQuery: _searchQuery,
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final Contact? contact = await Navigator.of(context).push<Contact?>(
@@ -103,7 +97,7 @@ class EventPage extends ConsumerWidget {
           );
 
           if (contact != null) {
-            ref.invalidate(eventContactsProvider(eventId));
+            ref.invalidate(eventContactsProvider(widget.eventId));
             ref.invalidate(contactsProvider);
           }
         },

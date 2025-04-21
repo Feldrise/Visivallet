@@ -21,6 +21,7 @@ class MainApp extends ConsumerWidget {
     TextTheme textTheme = createTextTheme(context, "Sora", "Sora");
 
     final brightness = View.of(context).platformDispatcher.platformBrightness;
+    // final Brightness brightness = Brightness.light;
     final MaterialTheme theme = MaterialTheme(textTheme);
 
     return MaterialApp.router(

@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:visivallet/features/contacts/database/tables/contact_table.dart';
 import 'package:visivallet/features/event/database/tables/event_contact_table.dart';
@@ -20,9 +24,23 @@ class AppDatabase {
 
   Future<Database> _initDatabase() async {
     // Initialize the database
-    sqfliteFfiInit();
-    final db = await databaseFactoryFfi.openDatabase(
-      'app_database.db',
+    if (Platform.isWindows || Platform.isLinux) {
+      // Initialize FFI
+      sqfliteFfiInit();
+    }
+
+    databaseFactory = databaseFactoryFfi;
+
+    // final String path = await getDatabasesPath();
+    final Directory pathDirectory = await getApplicationDocumentsDirectory();
+
+    if (!(await pathDirectory.exists())) {
+      await pathDirectory.create(recursive: true);
+    }
+
+    final String path = pathDirectory.path;
+    final db = await databaseFactory.openDatabase(
+      join(path, 'visivallet_database.db'),
       options: OpenDatabaseOptions(
         version: 1,
         onCreate: _onCreate,

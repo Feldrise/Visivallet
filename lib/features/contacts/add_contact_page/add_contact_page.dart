@@ -33,6 +33,11 @@ class _AddContactPageState extends State<AddContactPage> {
         key: _contactFormKey,
         event: widget.event,
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        label: const Text("Enregistrer"),
+        icon: const Icon(Icons.save_outlined),
+        onPressed: () => _contactFormKey.currentState?.save(),
+      ),
     );
   }
 }

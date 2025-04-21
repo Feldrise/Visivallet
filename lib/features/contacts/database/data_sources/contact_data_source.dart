@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
 import 'package:visivallet/core/database/app_database.dart';
 import 'package:visivallet/features/contacts/database/tables/contact_table.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
@@ -24,10 +28,30 @@ class ContactDataSource {
   }
 
   Future<int> createContact(Contact contact) async {
-    return await _db.insert(
+    final int id = await _db.insert(
       ContactTable.tableName,
       ContactTable.toMap(contact),
     );
+
+    // If there is an image, save it to the file system or database
+    if (contact.imageBase64 == null) {
+      return id;
+    }
+
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final Directory contactsDir = Directory('${directory.path}/contacts');
+
+    if (!await contactsDir.exists()) {
+      await contactsDir.create(recursive: true);
+    }
+
+    final String filename = 'contact_$id.png';
+    final File file = File('${contactsDir.path}/$filename');
+
+    // Save the image to the file system
+    await file.writeAsBytes(base64Decode(contact.imageBase64!));
+
+    return id;
   }
 
   Future<int> updateContact(Contact contact) async {

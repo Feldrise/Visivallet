@@ -343,12 +343,12 @@ class MaterialTheme {
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         ),
-        scaffoldBackgroundColor: colorScheme.background,
-        canvasColor: colorScheme.surface,
+        // scaffoldBackgroundColor: colorScheme.background,
+        // canvasColor: colorScheme.surface,
         cardTheme: CardTheme(
-          elevation: 5,
-          color: colorScheme.surface,
-          shadowColor: colorScheme.shadow,
+          elevation: 20,
+          // color: colorScheme.surface,
+          shadowColor: colorScheme.shadow.withOpacity(0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),

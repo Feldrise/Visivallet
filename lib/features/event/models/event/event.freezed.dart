@@ -1,4 +1,3 @@
-// dart format width=80
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
@@ -10,61 +9,48 @@ part of 'event.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+
+Event _$EventFromJson(Map<String, dynamic> json) {
+  return _Event.fromJson(json);
+}
 
 /// @nodoc
 mixin _$Event {
   @override
-  int? get id;
-  String get name;
-  String get description;
+  int? get id => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  String get description => throw _privateConstructorUsedError;
+
+  /// Serializes this Event to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  $EventCopyWith<Event> get copyWith =>
-      _$EventCopyWithImpl<Event>(this as Event, _$identity);
-
-  /// Serializes this Event to a JSON map.
-  Map<String, dynamic> toJson();
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is Event &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.description, description) ||
-                other.description == description));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, id, name, description);
-
-  @override
-  String toString() {
-    return 'Event(id: $id, name: $name, description: $description)';
-  }
+  $EventCopyWith<Event> get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract mixin class $EventCopyWith<$Res> {
-  factory $EventCopyWith(Event value, $Res Function(Event) _then) =
-      _$EventCopyWithImpl;
+abstract class $EventCopyWith<$Res> {
+  factory $EventCopyWith(Event value, $Res Function(Event) then) =
+      _$EventCopyWithImpl<$Res, Event>;
   @useResult
   $Res call({@override int? id, String name, String description});
 }
 
 /// @nodoc
-class _$EventCopyWithImpl<$Res> implements $EventCopyWith<$Res> {
-  _$EventCopyWithImpl(this._self, this._then);
+class _$EventCopyWithImpl<$Res, $Val extends Event>
+    implements $EventCopyWith<$Res> {
+  _$EventCopyWithImpl(this._value, this._then);
 
-  final Event _self;
-  final $Res Function(Event) _then;
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
   /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
@@ -75,17 +61,61 @@ class _$EventCopyWithImpl<$Res> implements $EventCopyWith<$Res> {
     Object? name = null,
     Object? description = null,
   }) {
-    return _then(_self.copyWith(
+    return _then(_value.copyWith(
       id: freezed == id
-          ? _self.id
+          ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int?,
       name: null == name
-          ? _self.name
+          ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
       description: null == description
-          ? _self.description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$EventImplCopyWith<$Res> implements $EventCopyWith<$Res> {
+  factory _$$EventImplCopyWith(
+          _$EventImpl value, $Res Function(_$EventImpl) then) =
+      __$$EventImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({@override int? id, String name, String description});
+}
+
+/// @nodoc
+class __$$EventImplCopyWithImpl<$Res>
+    extends _$EventCopyWithImpl<$Res, _$EventImpl>
+    implements _$$EventImplCopyWith<$Res> {
+  __$$EventImplCopyWithImpl(
+      _$EventImpl _value, $Res Function(_$EventImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of Event
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = freezed,
+    Object? name = null,
+    Object? description = null,
+  }) {
+    return _then(_$EventImpl(
+      id: freezed == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String,
     ));
@@ -94,10 +124,13 @@ class _$EventCopyWithImpl<$Res> implements $EventCopyWith<$Res> {
 
 /// @nodoc
 @JsonSerializable()
-class _Event extends Event {
-  _Event({@override this.id, required this.name, required this.description})
+class _$EventImpl extends _Event {
+  _$EventImpl(
+      {@override this.id, required this.name, required this.description})
       : super._();
-  factory _Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
+
+  factory _$EventImpl.fromJson(Map<String, dynamic> json) =>
+      _$$EventImplFromJson(json);
 
   @override
   @override
@@ -107,26 +140,16 @@ class _Event extends Event {
   @override
   final String description;
 
-  /// Create a copy of Event
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @pragma('vm:prefer-inline')
-  _$EventCopyWith<_Event> get copyWith =>
-      __$EventCopyWithImpl<_Event>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$EventToJson(
-      this,
-    );
+  String toString() {
+    return 'Event(id: $id, name: $name, description: $description)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _Event &&
+            other is _$EventImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.description, description) ||
@@ -137,52 +160,43 @@ class _Event extends Event {
   @override
   int get hashCode => Object.hash(runtimeType, id, name, description);
 
+  /// Create a copy of Event
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  String toString() {
-    return 'Event(id: $id, name: $name, description: $description)';
+  @pragma('vm:prefer-inline')
+  _$$EventImplCopyWith<_$EventImpl> get copyWith =>
+      __$$EventImplCopyWithImpl<_$EventImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$EventImplToJson(
+      this,
+    );
   }
 }
 
-/// @nodoc
-abstract mixin class _$EventCopyWith<$Res> implements $EventCopyWith<$Res> {
-  factory _$EventCopyWith(_Event value, $Res Function(_Event) _then) =
-      __$EventCopyWithImpl;
+abstract class _Event extends Event {
+  factory _Event(
+      {@override final int? id,
+      required final String name,
+      required final String description}) = _$EventImpl;
+  _Event._() : super._();
+
+  factory _Event.fromJson(Map<String, dynamic> json) = _$EventImpl.fromJson;
+
   @override
-  @useResult
-  $Res call({@override int? id, String name, String description});
-}
-
-/// @nodoc
-class __$EventCopyWithImpl<$Res> implements _$EventCopyWith<$Res> {
-  __$EventCopyWithImpl(this._self, this._then);
-
-  final _Event _self;
-  final $Res Function(_Event) _then;
+  @override
+  int? get id;
+  @override
+  String get name;
+  @override
+  String get description;
 
   /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
   @override
-  @pragma('vm:prefer-inline')
-  $Res call({
-    Object? id = freezed,
-    Object? name = null,
-    Object? description = null,
-  }) {
-    return _then(_Event(
-      id: freezed == id
-          ? _self.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as int?,
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: null == description
-          ? _self.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$EventImplCopyWith<_$EventImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
-
-// dart format on

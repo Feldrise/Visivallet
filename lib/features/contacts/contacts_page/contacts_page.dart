@@ -1,86 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:visivallet/core/providers.dart';
-import 'package:visivallet/core/widgets/shimmers/square_shimmer.dart';
-import 'package:visivallet/features/contacts/models/contact/contact.dart';
-import 'package:visivallet/features/contacts/widgets/contact_card.dart';
+import 'package:visivallet/features/contacts/widgets/contacts_list.dart';
 import 'package:visivallet/theme/screen_helper.dart';
 
-class ContactsPage extends ConsumerWidget {
+class ContactsPage extends ConsumerStatefulWidget {
   const ContactsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ContactsPage> createState() => _ContactsPageState();
+}
+
+class _ContactsPageState extends ConsumerState<ContactsPage> {
+  String? _searchQuery = "";
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Contacts"),
         centerTitle: true,
       ),
-      body: Builder(
-        builder: (context) {
-          final contactsState = ref.watch(contactsProvider);
-
-          if (contactsState.isLoading) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (int i = 0; i < 5; i++) ...[
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: ScreenHelper.instance.horizontalPadding, vertical: 8),
-                    child: const SquareShimmer(height: 80),
-                  ),
-                ],
-              ],
-            );
-          }
-
-          if (contactsState.hasError) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: ScreenHelper.instance.horizontalPadding, vertical: 8),
-              child: Center(
-                child: Text(
-                  "Une erreur est survenue : ${contactsState.hasError}",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: ScreenHelper.instance.horizontalPadding,
+              vertical: 8,
+            ),
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: "Rechercher un contact",
+                hintText: "Nom, prénom, numéro de téléphone ou email",
+                prefixIcon: Icon(Icons.search),
               ),
-            );
-          }
-
-          final List<Contact> contacts = contactsState.value ?? [];
-
-          if (contacts.isEmpty) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: ScreenHelper.instance.horizontalPadding, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.contacts_outlined,
-                    size: 64,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Aucun contact trouvé",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView(
-            padding: EdgeInsets.symmetric(horizontal: ScreenHelper.instance.horizontalPadding, vertical: 8),
-            children: [
-              for (final contact in contacts) ...[
-                ContactCard(contact: contact),
-                const SizedBox(height: 8),
-              ]
-            ],
-          );
-        },
+              onChanged: (value) => setState(() {
+                _searchQuery = value;
+              }),
+            ),
+          ),
+          Expanded(
+            child: ContactsList(
+              searchQuery: _searchQuery,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,16 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visivallet/features/main_page/router.dart';
+import 'package:visivallet/features/user/profile_page/profile_page.dart';
 import 'package:visivallet/theme/theme.dart';
 import 'package:visivallet/theme/util.dart';
 
-void main() {
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(const ProviderScope(
-    child: MainApp(),
-  ));
+  // Load saved theme preference
+  final prefs = await SharedPreferences.getInstance();
+  final String? themePreference = prefs.getString('themeMode');
+
+  ThemeMode initialThemeMode = ThemeMode.system;
+  if (themePreference == 'dark') {
+    initialThemeMode = ThemeMode.dark;
+  } else if (themePreference == 'light') {
+    initialThemeMode = ThemeMode.light;
+  }
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        themeModeProvider.overrideWith((ref) => initialThemeMode),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends ConsumerWidget {
@@ -20,34 +40,19 @@ class MainApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     TextTheme textTheme = createTextTheme(context, "Sora", "Sora");
 
-    final brightness = View.of(context).platformDispatcher.platformBrightness;
-    // final Brightness brightness = Brightness.light;
+    final themeMode = ref.watch(themeModeProvider);
     final MaterialTheme theme = MaterialTheme(textTheme);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      themeMode: themeMode,
+      theme: theme.light(),
+      darkTheme: theme.dark(),
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       supportedLocales: const [
         Locale('fr', 'FR'),
       ],
       routerConfig: router(),
     );
-    // error: (e, _) => MaterialApp(
-    //   theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-    //   home: Scaffold(
-    //     body: Center(
-    //       child: Text(
-    //         e.toString(),
-    //         style: textTheme.bodyLarge,
-    //       ),
-    //     ),
-    //   ),
-    // ),
-    // loading: () => MaterialApp(
-    //   theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-    //   home: const SplashScreen(),
-    // ),
-    // );
   }
 }

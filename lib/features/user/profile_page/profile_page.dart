@@ -10,6 +10,7 @@ import 'package:visivallet/core/widgets/loading_overlay.dart';
 import 'package:visivallet/core/widgets/success_snackbar.dart';
 import 'package:visivallet/theme/screen_helper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:visivallet/main.dart'; // Import to access the themeModeProvider
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -39,6 +40,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _emailController.text = preferences.getString('email') ?? '';
     _phoneController.value = PhoneNumber(isoCode: IsoCode.FR, nsn: preferences.getString('phone') ?? '');
     _profileImage = preferences.getString('profileImage') != null ? base64Decode(preferences.getString('profileImage')!) : null;
+  }
+
+  Future<void> _changeTheme(ThemeMode themeMode) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String themeValue;
+
+    switch (themeMode) {
+      case ThemeMode.dark:
+        themeValue = 'dark';
+        break;
+      case ThemeMode.light:
+        themeValue = 'light';
+        break;
+      default:
+        themeValue = 'system';
+    }
+
+    await prefs.setString('themeMode', themeValue);
+
+    // Update the provider to make the change immediate
+    ref.read(themeModeProvider.notifier).state = themeMode;
   }
 
   Future<void> _pickImage() async {
@@ -184,6 +206,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 _buildInfoTile(Icons.email, "Email", _emailController.text),
                 _buildInfoTile(Icons.phone, "Téléphone", _phoneController.value?.international ?? ""),
+                _buildThemeTile(),
               ],
             ),
           ),
@@ -203,6 +226,113 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ],
       ),
     );
+  }
+
+  Widget _buildThemeTile() {
+    // Read the current theme from the provider
+    final currentThemeMode = ref.watch(themeModeProvider);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: Icon(Icons.brightness_6, color: Theme.of(context).colorScheme.primary),
+            title: Text(
+              "Thème",
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+            subtitle: Text(
+              _getThemeModeName(currentThemeMode),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildThemeOption(
+                  icon: Icons.brightness_auto,
+                  label: "Auto",
+                  themeMode: ThemeMode.system,
+                  isSelected: currentThemeMode == ThemeMode.system,
+                ),
+                _buildThemeOption(
+                  icon: Icons.light_mode,
+                  label: "Clair",
+                  themeMode: ThemeMode.light,
+                  isSelected: currentThemeMode == ThemeMode.light,
+                ),
+                _buildThemeOption(
+                  icon: Icons.dark_mode,
+                  label: "Sombre",
+                  themeMode: ThemeMode.dark,
+                  isSelected: currentThemeMode == ThemeMode.dark,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption({
+    required IconData icon,
+    required String label,
+    required ThemeMode themeMode,
+    required bool isSelected,
+  }) {
+    return InkWell(
+      onTap: () => _changeTheme(themeMode),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onBackground,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getThemeModeName(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.dark:
+        return 'Mode sombre';
+      case ThemeMode.light:
+        return 'Mode clair';
+      default:
+        return 'Automatique (système)';
+    }
   }
 
   Widget _buildInfoTile(IconData icon, String label, String value) {

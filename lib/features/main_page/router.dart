@@ -4,6 +4,7 @@ import 'package:visivallet/features/contacts/contacts_page/contacts_page.dart';
 import 'package:visivallet/features/event/event_page/event_page.dart';
 import 'package:visivallet/features/event/events_page/events_page.dart';
 import 'package:visivallet/features/main_page/main_page.dart';
+import 'package:visivallet/features/user/profile_page/profile_page.dart';
 
 CustomTransitionPage<dynamic> _buildPageWithDefaultTransition<T>({
   required BuildContext context,
@@ -63,15 +64,11 @@ GoRouter router() => GoRouter(
             ),
             GoRoute(
               path: "/profile",
-              builder: (context, state) => const Center(
-                child: Text("Mon profil"),
-              ),
+              builder: (context, state) => const ProfilePage(),
               pageBuilder: (context, state) => _buildPageWithDefaultTransition<Object>(
                 context: context,
                 state: state,
-                child: const Center(
-                  child: Text("Mon profil"),
-                ),
+                child: const ProfilePage(),
               ),
             )
           ],

@@ -89,24 +89,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Mon Profil"),
         actions: [
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveProfile,
-              tooltip: "Enregistrer",
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: _toggleEditMode,
-              tooltip: "Modifier",
-            ),
+          IconButton(
+            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            onPressed: _isEditing ? _saveProfile : _toggleEditMode,
+            tooltip: _isEditing ? "Enregistrer" : "Modifier",
+          ),
         ],
       ),
       body: FutureBuilder(
@@ -128,69 +120,170 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               );
             }
 
-            return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: ScreenHelper.instance.horizontalPadding,
-                  vertical: 16,
+            return _isEditing ? _buildEditingView() : _buildProfileView();
+          }),
+    );
+  }
+
+  Widget _buildProfileView() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Hero image section with profile photo
+          Container(
+            width: double.infinity,
+            height: 200,
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Center(
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.background,
+                    width: 4,
+                  ),
+                  image: _profileImage != null
+                      ? DecorationImage(
+                          image: MemoryImage(_profileImage!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: Form(
-                  key: _formKey,
+                child: _profileImage == null
+                    ? Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      )
+                    : null,
+              ),
+            ),
+          ),
+
+          // Name section
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "${_firstNameController.text} ${_lastNameController.text}",
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
+          // Info cards
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: ScreenHelper.instance.horizontalPadding,
+              vertical: 8,
+            ),
+            child: Column(
+              children: [
+                _buildInfoTile(Icons.email, "Email", _emailController.text),
+                _buildInfoTile(Icons.phone, "Téléphone", _phoneController.value?.international ?? ""),
+              ],
+            ),
+          ),
+
+          // Edit button
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: FilledButton.icon(
+              onPressed: _toggleEditMode,
+              icon: const Icon(Icons.edit),
+              label: const Text("Modifier mon profil"),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoTile(IconData icon, String label, String value) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Theme.of(context).colorScheme.secondary,
+          ),
+        ),
+        subtitle: Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+    );
+  }
+
+  Widget _buildEditingView() {
+    // Keep your existing edit mode UI
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: ScreenHelper.instance.horizontalPadding,
+          vertical: 16,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              _buildProfileImage(),
-                              const SizedBox(height: 24),
-                              _buildInfoForm(),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (_errorMessage != null) ...[
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      if (_isEditing) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            OutlinedButton.icon(
-                              onPressed: _toggleEditMode,
-                              icon: const Icon(Icons.cancel),
-                              label: const Text("Annuler"),
-                            ),
-                            FilledButton.icon(
-                              onPressed: _saveProfile,
-                              icon: const Icon(Icons.save),
-                              label: const Text("Enregistrer"),
-                            ),
-                          ],
-                        ),
-                      ] else ...[
-                        FilledButton.icon(
-                          onPressed: _toggleEditMode,
-                          icon: const Icon(Icons.edit),
-                          label: const Text("Modifier mon profil"),
-                        ),
-                      ],
+                      _buildProfileImage(),
+                      const SizedBox(height: 24),
+                      _buildInfoForm(),
                     ],
                   ),
                 ),
               ),
-            );
-          }),
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _errorMessage!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _toggleEditMode,
+                    icon: const Icon(Icons.cancel),
+                    label: const Text("Annuler"),
+                  ),
+                  FilledButton.icon(
+                    onPressed: _saveProfile,
+                    icon: const Icon(Icons.save),
+                    label: const Text("Enregistrer"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

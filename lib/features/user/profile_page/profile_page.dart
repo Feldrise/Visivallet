@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visivallet/core/form_validator.dart';
-import 'package:visivallet/core/widgets/error_snackbar.dart';
 import 'package:visivallet/core/widgets/loading_overlay.dart';
 import 'package:visivallet/core/widgets/success_snackbar.dart';
 import 'package:visivallet/theme/screen_helper.dart';

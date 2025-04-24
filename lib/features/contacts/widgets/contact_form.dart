@@ -6,15 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_scalable_ocr/flutter_scalable_ocr.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:visivallet/core/dialogs/confirmation_dialog.dart';
 import 'package:visivallet/core/form_validator.dart';
 import 'package:visivallet/core/providers.dart';
 import 'package:visivallet/core/widgets/error_snackbar.dart';
 import 'package:visivallet/core/widgets/loading_overlay.dart';
+import 'package:visivallet/core/widgets/success_snackbar.dart';
 import 'package:visivallet/features/contacts/database/repositories/contact_repository.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
+import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
 import 'package:visivallet/features/event/database/repositories/event_repository.dart';
 import 'package:visivallet/features/event/models/event/event.dart';
 import 'package:visivallet/theme/screen_helper.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as phc;
 
 class ContactForm extends ConsumerStatefulWidget {
   const ContactForm({
@@ -281,6 +285,36 @@ class ContactFormState extends ConsumerState<ContactForm> {
       newContact = await contactRepository.createContact(newContact);
       if (widget.event != null) {
         await eventRepository.addContactToEvent(widget.event!.id!, newContact.id!);
+      }
+
+      final phc.Contact? existingContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(newContact.phone);
+
+      if (existingContact == null && mounted) {
+        final bool shouldAddToContact = await showDialog<bool?>(
+              context: context,
+              builder: (context) => ConfirmationDialog(
+                title: "Ajouter le contact à votre répertoire ?",
+                content: "Voulez-vous ajouter le contact ${newContact.firstName} ${newContact.lastName} à votre répertoire ?",
+              ),
+            ) ??
+            false;
+
+        if (shouldAddToContact) {
+          final phc.Contact newPhoneContact = phc.Contact(
+            displayName: "${newContact.firstName} ${newContact.lastName}",
+            name: phc.Name(
+              first: newContact.firstName,
+              last: newContact.lastName,
+            ),
+            phones: [phc.Phone(newContact.phone)],
+          );
+
+          await ref.read(phoneContactsProvider.notifier).addContact(newPhoneContact);
+
+          if (mounted) {
+            SuccessSnackbar.show(context, "Contact ajouté à votre répertoire");
+          }
+        }
       }
 
       if (mounted) {

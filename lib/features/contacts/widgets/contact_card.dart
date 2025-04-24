@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:visivallet/core/widgets/loading_overlay.dart';
+import 'package:visivallet/core/widgets/success_snackbar.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
+import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as phc;
 
-class ContactCard extends StatelessWidget {
+class ContactCard extends ConsumerWidget {
   const ContactCard({
     super.key,
     required this.contact,
@@ -10,7 +15,7 @@ class ContactCard extends StatelessWidget {
   final Contact contact;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // return ListTile(
     //   title: Text("${contact.firstName} ${contact.lastName}"),
     //   subtitle: Text(contact.email),
@@ -18,6 +23,8 @@ class ContactCard extends StatelessWidget {
     //     // Handle contact tap
     //   },
     // );
+    final phc.Contact? phoneContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(contact.phone);
+
     return Card(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -60,6 +67,30 @@ class ContactCard extends StatelessWidget {
           ListTile(
             title: Text("${contact.firstName} ${contact.lastName}"),
             subtitle: Text(contact.email),
+            trailing: phoneContact == null
+                ? IconButton(
+                    onPressed: () async {
+                      LoadingOverlay.of(context).show();
+
+                      final phc.Contact newContact = phc.Contact(
+                        displayName: "${contact.firstName} ${contact.lastName}",
+                        name: phc.Name(
+                          first: contact.firstName,
+                          last: contact.lastName,
+                        ),
+                        phones: [phc.Phone(contact.phone)],
+                      );
+
+                      await ref.read(phoneContactsProvider.notifier).addContact(newContact);
+
+                      if (context.mounted) {
+                        LoadingOverlay.of(context).hide();
+                        SuccessSnackbar.show(context, "Contact ajouté à votre répertoire");
+                      }
+                    },
+                    icon: const Icon(Icons.person_add_outlined),
+                  )
+                : null,
             onTap: () {
               // Handle contact tap
             },

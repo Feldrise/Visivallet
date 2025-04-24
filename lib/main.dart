@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:visivallet/core/widgets/splash_screen.dart';
+import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
 import 'package:visivallet/features/main_page/router.dart';
 import 'package:visivallet/theme/theme.dart';
 import 'package:visivallet/theme/util.dart';
@@ -42,16 +44,30 @@ class MainApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final MaterialTheme theme = MaterialTheme(textTheme);
 
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      themeMode: themeMode,
-      theme: theme.light(),
-      darkTheme: theme.dark(),
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: const [
-        Locale('fr', 'FR'),
-      ],
-      routerConfig: router(),
-    );
+    return FutureBuilder(
+        future: ref.read(phoneContactsProvider.notifier).init(),
+        builder: (context, snaphsot) {
+          if (snaphsot.connectionState == ConnectionState.waiting) {
+            return const SplashScreen();
+          }
+
+          if (snaphsot.hasError) {
+            return const Center(
+              child: Text("Erreur lors du chargement des contacts"),
+            );
+          }
+
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            themeMode: themeMode,
+            theme: theme.light(),
+            darkTheme: theme.dark(),
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            supportedLocales: const [
+              Locale('fr', 'FR'),
+            ],
+            routerConfig: router(),
+          );
+        });
   }
 }

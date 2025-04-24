@@ -15,7 +15,7 @@ class EventsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final eventsState = ref.watch(eventsProvider);
+    final eventsState = searchQuery.isEmpty ? ref.watch(eventsProvider) : ref.watch(filteredEventsProvider(searchQuery));
 
     if (eventsState.isLoading) {
       return Column(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:visivallet/core/providers.dart';
@@ -16,6 +18,23 @@ class EventsPage extends ConsumerStatefulWidget {
 
 class _EventsPageState extends ConsumerState<EventsPage> {
   String _searchQuery = "";
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _debounceSearch(String value) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      setState(() {
+        _searchQuery = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +58,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                 hintText: "Titre ou description",
                 prefixIcon: Icon(Icons.search),
               ),
-              onChanged: (value) => setState(() {
-                _searchQuery = value;
-              }),
+              onChanged: _debounceSearch,
             ),
           ),
           Expanded(

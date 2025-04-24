@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:visivallet/core/providers.dart';
@@ -19,6 +21,23 @@ class EventPage extends ConsumerStatefulWidget {
 
 class _EventPageState extends ConsumerState<EventPage> {
   String _searchQuery = "";
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _debounceSearch(String value) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      setState(() {
+        _searchQuery = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +94,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                 hintText: "Nom, prénom, numéro de téléphone ou email",
                 prefixIcon: Icon(Icons.search),
               ),
-              onChanged: (value) => setState(() {
-                _searchQuery = value;
-              }),
+              onChanged: _debounceSearch,
             ),
           ),
           Expanded(

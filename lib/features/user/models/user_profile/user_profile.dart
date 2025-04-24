@@ -23,7 +23,7 @@ abstract class UserProfile with _$UserProfile {
 
   Future<Uint8List?> getImage() async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    final String filename = 'profile_${userId ?? 0}.png';
+    final String filename = 'profile_$userId.png';
 
     final File file = File('${directory.path}/$filename');
 

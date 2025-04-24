@@ -110,6 +110,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -204,7 +205,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               children: [
                 _buildInfoTile(Icons.email, "Email", _emailController.text),
-                _buildInfoTile(Icons.phone, "Téléphone", _phoneController.value?.international ?? ""),
+                _buildInfoTile(Icons.phone, "Téléphone", _phoneController.value.international),
                 _buildThemeTile(),
               ],
             ),

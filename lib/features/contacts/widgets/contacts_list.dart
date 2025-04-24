@@ -19,7 +19,16 @@ class ContactsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final contactsState = event == null ? ref.watch(contactsProvider) : ref.watch(eventContactsProvider(event!.id!));
+    final contactsState = event == null
+        ? (searchQuery ?? "").isEmpty
+            ? ref.watch(contactsProvider)
+            : ref.watch(filteredContactsProvider(searchQuery!))
+        : (searchQuery ?? "").isEmpty
+            ? ref.watch(eventContactsProvider(event!.id!))
+            : ref.watch(filteredEventContactsProvider({
+                "eventId": event!.id!,
+                "filter": searchQuery!,
+              }));
 
     if (contactsState.isLoading) {
       return Column(

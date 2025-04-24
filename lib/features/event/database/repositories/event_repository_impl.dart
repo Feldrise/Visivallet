@@ -17,6 +17,11 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
+  Future<List<Event>> getAllEventsFiltered(String filter) {
+    return _eventDataSource.getAllEventsFiltered(filter);
+  }
+
+  @override
   Future<Event?> getEventById(int id) {
     return _eventDataSource.getEventById(id);
   }
@@ -43,6 +48,11 @@ class EventRepositoryImpl implements EventRepository {
   @override
   Future<List<Contact>> getContactsForEvent(int eventId) {
     return _relationshipDataSource.getContactsForEvent(eventId);
+  }
+
+  @override
+  Future<List<Contact>> getContactsForEventFiltered(int eventId, String filter) {
+    return _relationshipDataSource.getContactsForEventFiltered(eventId, filter);
   }
 
   @override

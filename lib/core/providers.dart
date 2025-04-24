@@ -40,6 +40,12 @@ final eventsProvider = FutureProvider<List<Event>>((ref) async {
   return repository.getAllEvents();
 });
 
+// Provider for filtered events
+final filteredEventsProvider = FutureProvider.family<List<Event>, String>((ref, filter) async {
+  final repository = ref.watch(eventRepositoryProvider);
+  return repository.getAllEventsFiltered(filter);
+});
+
 // Provider for a single event
 final eventProvider = FutureProvider.family<Event?, int>((ref, id) async {
   final repository = ref.watch(eventRepositoryProvider);
@@ -52,6 +58,14 @@ final eventContactsProvider = FutureProvider.family<List<Contact>, int>((ref, ev
   return repository.getContactsForEvent(eventId);
 });
 
+// Provider for filtered contacts in an event
+final filteredEventContactsProvider = FutureProvider.family<List<Contact>, Map<String, dynamic>>((ref, args) async {
+  final eventId = args['eventId'] as int;
+  final filter = args['filter'] as String;
+  final repository = ref.watch(eventRepositoryProvider);
+  return repository.getContactsForEventFiltered(eventId, filter);
+});
+
 // Provider for events that a contact belongs to
 final contactEventsProvider = FutureProvider.family<List<Event>, int>((ref, contactId) async {
   final repository = ref.watch(eventRepositoryProvider);
@@ -62,11 +76,19 @@ final contactEventsProvider = FutureProvider.family<List<Event>, int>((ref, cont
 // ### CONTACTS ###
 // ################
 
+// Provider for the contact data source
 final contactDataSourceProvider = Provider<ContactDataSource>((ref) {
   final database = ref.watch(appDatabaseProvider);
   return ContactDataSource(database);
 });
 
+// Provider for filtered contacts
+final filteredContactsProvider = FutureProvider.family<List<Contact>, String>((ref, filter) async {
+  final repository = ref.watch(contactRepositoryProvider);
+  return repository.getAllContactsFiltered(filter);
+});
+
+// Provider for a single contact
 final contactRepositoryProvider = Provider<ContactRepository>((ref) {
   final contactDataSource = ref.watch(contactDataSourceProvider);
   return ContactRepositoryImpl(contactDataSource);

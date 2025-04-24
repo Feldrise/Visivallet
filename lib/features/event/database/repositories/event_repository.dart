@@ -4,6 +4,7 @@ import 'package:visivallet/features/contacts/models/contact/contact.dart';
 abstract class EventRepository {
   // Event operations
   Future<List<Event>> getAllEvents();
+  Future<List<Event>> getAllEventsFiltered(String filter);
   Future<Event?> getEventById(int id);
   Future<Event> createEvent(Event event);
   Future<bool> updateEvent(Event event);
@@ -11,6 +12,7 @@ abstract class EventRepository {
 
   // Contact relationship operations
   Future<List<Contact>> getContactsForEvent(int eventId);
+  Future<List<Contact>> getContactsForEventFiltered(int eventId, String filter);
   Future<List<Event>> getEventsForContact(int contactId);
   Future<bool> addContactToEvent(int eventId, int contactId);
   Future<bool> removeContactFromEvent(int eventId, int contactId);

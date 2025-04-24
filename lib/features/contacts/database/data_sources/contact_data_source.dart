@@ -16,6 +16,18 @@ class ContactDataSource {
     return maps.map(ContactTable.fromMap).toList();
   }
 
+  Future<List<Contact>> getAllContactsFiltered(String filter) async {
+    final maps = await _db.query(
+      ContactTable.tableName,
+      where: '${ContactTable.columnFirstName} LIKE ?'
+          ' OR ${ContactTable.columnLastName} LIKE ?'
+          ' OR ${ContactTable.columnEmail} LIKE ?'
+          ' OR ${ContactTable.columnPhone} LIKE ?',
+      whereArgs: ['%$filter%', '%$filter%', '%$filter%', '%$filter%'],
+    );
+    return maps.map(ContactTable.fromMap).toList();
+  }
+
   Future<Contact?> getContactById(int id) async {
     final maps = await _db.query(
       ContactTable.tableName,

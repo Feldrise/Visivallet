@@ -40,6 +40,20 @@ class EventContactDataSource {
     return maps.map(ContactTable.fromMap).toList();
   }
 
+  // Get all contacts for a specific event with filtering
+  Future<List<Contact>> getContactsForEventFiltered(int eventId, String filter) async {
+    final sql = '''
+      SELECT c.*
+      FROM ${ContactTable.tableName} c
+      JOIN ${EventContactTable.tableName} ec ON c.${ContactTable.columnId} = ec.${EventContactTable.columnContactId}
+      WHERE ec.${EventContactTable.columnEventId} = ?
+      AND (c.${ContactTable.columnFirstName} LIKE ? OR c.${ContactTable.columnLastName} LIKE ? OR c.${ContactTable.columnEmail} LIKE ? OR c.${ContactTable.columnPhone} LIKE ?)
+    ''';
+
+    final maps = await _db.rawQuery(sql, [eventId, '%$filter%', '%$filter%', '%$filter%', '%$filter%']);
+    return maps.map(ContactTable.fromMap).toList();
+  }
+
   // Get all events for a specific contact
   Future<List<Event>> getEventsForContact(int contactId) async {
     final sql = '''

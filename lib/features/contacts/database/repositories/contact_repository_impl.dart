@@ -14,6 +14,11 @@ class ContactRepositoryImpl implements ContactRepository {
   }
 
   @override
+  Future<List<Contact>> getAllContactsFiltered(String filter) {
+    return _contactDataSource.getAllContactsFiltered(filter);
+  }
+
+  @override
   Future<Contact?> getContactById(int id) {
     return _contactDataSource.getContactById(id);
   }

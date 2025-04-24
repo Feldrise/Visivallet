@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:visivallet/features/event/models/event/event.dart';
 
 part 'contact.freezed.dart';
 part 'contact.g.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:visivallet/features/event/event_page/event_page.dart';
 import 'package:visivallet/features/event/models/event/event.dart';
 
 class EventCard extends StatelessWidget {

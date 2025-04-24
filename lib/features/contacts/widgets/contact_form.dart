@@ -30,11 +30,6 @@ class ContactForm extends ConsumerStatefulWidget {
   ConsumerState<ContactForm> createState() => ContactFormState();
 }
 
-String _capitalizeWord(String word) {
-  if (word.isEmpty) return '';
-  return word[0].toUpperCase() + word.substring(1).toLowerCase();
-}
-
 class ContactFormState extends ConsumerState<ContactForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScalableOCRState> _ocrKey = GlobalKey<ScalableOCRState>();

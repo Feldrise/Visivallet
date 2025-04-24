@@ -1,6 +1,4 @@
 import 'package:visivallet/core/database/app_database.dart';
-import 'package:visivallet/features/contacts/database/tables/contact_table.dart';
-import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/event/database/tables/event_table.dart';
 import 'package:visivallet/features/event/models/event/event.dart';
 
@@ -11,6 +9,15 @@ class EventDataSource {
 
   Future<List<Event>> getAllEvents() async {
     final maps = await _db.query(EventTable.tableName);
+    return maps.map(EventTable.fromMap).toList();
+  }
+
+  Future<List<Event>> getAllEventsFiltered(String filter) async {
+    final maps = await _db.query(
+      EventTable.tableName,
+      where: '${EventTable.columnName} LIKE ?',
+      whereArgs: ['%$filter%'],
+    );
     return maps.map(EventTable.fromMap).toList();
   }
 

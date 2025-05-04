@@ -8,7 +8,7 @@ class AddContactPage extends StatefulWidget {
     required this.event,
   });
 
-  final Event event;
+  final Event? event;
 
   @override
   State<AddContactPage> createState() => _AddContactPageState();

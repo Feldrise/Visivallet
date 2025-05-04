@@ -12,7 +12,7 @@ class ContactDataSource {
   ContactDataSource(this._db);
 
   Future<List<Contact>> getAllContacts() async {
-    final maps = await _db.query(ContactTable.tableName);
+    final maps = await _db.query(ContactTable.tableName, orderBy: '${ContactTable.columnId} DESC');
     return maps.map(ContactTable.fromMap).toList();
   }
 
@@ -24,6 +24,7 @@ class ContactDataSource {
           ' OR ${ContactTable.columnEmail} LIKE ?'
           ' OR ${ContactTable.columnPhone} LIKE ?',
       whereArgs: ['%$filter%', '%$filter%', '%$filter%', '%$filter%'],
+      orderBy: '${ContactTable.columnId} DESC',
     );
     return maps.map(ContactTable.fromMap).toList();
   }

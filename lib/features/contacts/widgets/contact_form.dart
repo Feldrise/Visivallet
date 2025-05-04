@@ -295,6 +295,7 @@ class ContactFormState extends ConsumerState<ContactForm> {
               builder: (context) => ConfirmationDialog(
                 title: "Ajouter le contact à votre répertoire ?",
                 content: "Voulez-vous ajouter le contact ${newContact.firstName} ${newContact.lastName} à votre répertoire ?",
+                cancelButtonLabel: "Non",
               ),
             ) ??
             false;

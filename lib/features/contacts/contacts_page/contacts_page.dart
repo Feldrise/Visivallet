@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:visivallet/core/providers.dart';
+import 'package:visivallet/features/contacts/add_contact_page/add_contact_page.dart';
+import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/widgets/contacts_list.dart';
 import 'package:visivallet/theme/screen_helper.dart';
 
@@ -61,6 +64,20 @@ class _ContactsPageState extends ConsumerState<ContactsPage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final Contact? contact = await Navigator.of(context).push<Contact?>(
+            MaterialPageRoute<Contact?>(
+              builder: (context) => const AddContactPage(event: null),
+            ),
+          );
+
+          if (contact != null) {
+            ref.invalidate(contactsProvider);
+          }
+        },
+        child: const Icon(Icons.person_add_outlined),
       ),
     );
   }

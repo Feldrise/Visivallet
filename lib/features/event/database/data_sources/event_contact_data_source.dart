@@ -34,6 +34,7 @@ class EventContactDataSource {
       FROM ${ContactTable.tableName} c
       JOIN ${EventContactTable.tableName} ec ON c.${ContactTable.columnId} = ec.${EventContactTable.columnContactId}
       WHERE ec.${EventContactTable.columnEventId} = ?
+      ORDER BY c.${ContactTable.columnFirstName} DESC
     ''';
 
     final maps = await _db.rawQuery(sql, [eventId]);
@@ -48,6 +49,7 @@ class EventContactDataSource {
       JOIN ${EventContactTable.tableName} ec ON c.${ContactTable.columnId} = ec.${EventContactTable.columnContactId}
       WHERE ec.${EventContactTable.columnEventId} = ?
       AND (c.${ContactTable.columnFirstName} LIKE ? OR c.${ContactTable.columnLastName} LIKE ? OR c.${ContactTable.columnEmail} LIKE ? OR c.${ContactTable.columnPhone} LIKE ?)
+      ORDER BY c.${ContactTable.columnFirstName} DESC
     ''';
 
     final maps = await _db.rawQuery(sql, [eventId, '%$filter%', '%$filter%', '%$filter%', '%$filter%']);

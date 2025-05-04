@@ -13,6 +13,7 @@ _$ContactImpl _$$ContactImplFromJson(Map<String, dynamic> json) =>
       lastName: json['lastName'] as String,
       email: json['email'] as String,
       phone: json['phone'] as String,
+      companyId: (json['companyId'] as num?)?.toInt(),
       imageBase64: json['imageBase64'] as String?,
     );
 
@@ -23,5 +24,6 @@ Map<String, dynamic> _$$ContactImplToJson(_$ContactImpl instance) =>
       'lastName': instance.lastName,
       'email': instance.email,
       'phone': instance.phone,
+      'companyId': instance.companyId,
       'imageBase64': instance.imageBase64,
     };

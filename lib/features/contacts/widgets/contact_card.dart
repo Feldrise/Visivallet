@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:visivallet/core/widgets/loading_overlay.dart';
 import 'package:visivallet/core/widgets/success_snackbar.dart';
+import 'package:visivallet/features/company/providers/company_provider.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as phc;
@@ -16,14 +17,10 @@ class ContactCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // return ListTile(
-    //   title: Text("${contact.firstName} ${contact.lastName}"),
-    //   subtitle: Text(contact.email),
-    //   onTap: () {
-    //     // Handle contact tap
-    //   },
-    // );
     final phc.Contact? phoneContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(contact.phone);
+
+    // Get company if companyId is available
+    final companyState = contact.companyId != null ? ref.watch(companyByIdProvider(contact.companyId!)) : null;
 
     return Card(
       child: Column(
@@ -65,7 +62,20 @@ class ContactCard extends ConsumerWidget {
                 }),
           ),
           ListTile(
-            title: Text("${contact.firstName} ${contact.lastName}"),
+            title: companyState != null
+                ? Builder(
+                    builder: (context) {
+                      final String name = "${contact.firstName} ${contact.lastName}";
+                      if (companyState.isLoading) {
+                        return Text(name);
+                      }
+                      if (companyState.hasError) {
+                        return Text(name);
+                      }
+                      return Text("$name (${companyState.value!.name})");
+                    },
+                  )
+                : Text("${contact.firstName} ${contact.lastName}"),
             subtitle: Text(contact.email),
             trailing: phoneContact == null
                 ? IconButton(

@@ -26,6 +26,7 @@ mixin _$Contact {
   String get lastName => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String get phone => throw _privateConstructorUsedError;
+  int? get companyId => throw _privateConstructorUsedError;
   String? get imageBase64 => throw _privateConstructorUsedError;
 
   /// Serializes this Contact to a JSON map.
@@ -48,6 +49,7 @@ abstract class $ContactCopyWith<$Res> {
       String lastName,
       String email,
       String phone,
+      int? companyId,
       String? imageBase64});
 }
 
@@ -71,6 +73,7 @@ class _$ContactCopyWithImpl<$Res, $Val extends Contact>
     Object? lastName = null,
     Object? email = null,
     Object? phone = null,
+    Object? companyId = freezed,
     Object? imageBase64 = freezed,
   }) {
     return _then(_value.copyWith(
@@ -94,6 +97,10 @@ class _$ContactCopyWithImpl<$Res, $Val extends Contact>
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
               as String,
+      companyId: freezed == companyId
+          ? _value.companyId
+          : companyId // ignore: cast_nullable_to_non_nullable
+              as int?,
       imageBase64: freezed == imageBase64
           ? _value.imageBase64
           : imageBase64 // ignore: cast_nullable_to_non_nullable
@@ -115,6 +122,7 @@ abstract class _$$ContactImplCopyWith<$Res> implements $ContactCopyWith<$Res> {
       String lastName,
       String email,
       String phone,
+      int? companyId,
       String? imageBase64});
 }
 
@@ -136,6 +144,7 @@ class __$$ContactImplCopyWithImpl<$Res>
     Object? lastName = null,
     Object? email = null,
     Object? phone = null,
+    Object? companyId = freezed,
     Object? imageBase64 = freezed,
   }) {
     return _then(_$ContactImpl(
@@ -159,6 +168,10 @@ class __$$ContactImplCopyWithImpl<$Res>
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
               as String,
+      companyId: freezed == companyId
+          ? _value.companyId
+          : companyId // ignore: cast_nullable_to_non_nullable
+              as int?,
       imageBase64: freezed == imageBase64
           ? _value.imageBase64
           : imageBase64 // ignore: cast_nullable_to_non_nullable
@@ -176,6 +189,7 @@ class _$ContactImpl extends _Contact {
       required this.lastName,
       required this.email,
       required this.phone,
+      this.companyId,
       this.imageBase64})
       : super._();
 
@@ -194,11 +208,13 @@ class _$ContactImpl extends _Contact {
   @override
   final String phone;
   @override
+  final int? companyId;
+  @override
   final String? imageBase64;
 
   @override
   String toString() {
-    return 'Contact(id: $id, firstName: $firstName, lastName: $lastName, email: $email, phone: $phone, imageBase64: $imageBase64)';
+    return 'Contact(id: $id, firstName: $firstName, lastName: $lastName, email: $email, phone: $phone, companyId: $companyId, imageBase64: $imageBase64)';
   }
 
   @override
@@ -213,14 +229,16 @@ class _$ContactImpl extends _Contact {
                 other.lastName == lastName) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.phone, phone) || other.phone == phone) &&
+            (identical(other.companyId, companyId) ||
+                other.companyId == companyId) &&
             (identical(other.imageBase64, imageBase64) ||
                 other.imageBase64 == imageBase64));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, firstName, lastName, email, phone, imageBase64);
+  int get hashCode => Object.hash(runtimeType, id, firstName, lastName, email,
+      phone, companyId, imageBase64);
 
   /// Create a copy of Contact
   /// with the given fields replaced by the non-null parameter values.
@@ -245,6 +263,7 @@ abstract class _Contact extends Contact {
       required final String lastName,
       required final String email,
       required final String phone,
+      final int? companyId,
       final String? imageBase64}) = _$ContactImpl;
   _Contact._() : super._();
 
@@ -261,6 +280,8 @@ abstract class _Contact extends Contact {
   String get email;
   @override
   String get phone;
+  @override
+  int? get companyId;
   @override
   String? get imageBase64;
 

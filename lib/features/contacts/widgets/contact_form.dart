@@ -11,7 +11,10 @@ import 'package:visivallet/core/form_validator.dart';
 import 'package:visivallet/core/providers.dart';
 import 'package:visivallet/core/widgets/error_snackbar.dart';
 import 'package:visivallet/core/widgets/loading_overlay.dart';
+import 'package:visivallet/core/widgets/searchable_dropdown.dart';
 import 'package:visivallet/core/widgets/success_snackbar.dart';
+import 'package:visivallet/features/company/models/company/company.dart';
+import 'package:visivallet/features/company/providers/company_provider.dart';
 import 'package:visivallet/features/contacts/database/repositories/contact_repository.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
@@ -44,8 +47,28 @@ class ContactFormState extends ConsumerState<ContactForm> {
 
   final PhoneController _phoneController = PhoneController(initialValue: const PhoneNumber(isoCode: IsoCode.FR, nsn: ""));
 
+  Company? _selectedCompany;
   bool _shouldScan = false;
   Uint8List? _image;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialContact != null) {
+      _firstNameController.text = widget.initialContact!.firstName;
+      _lastNameController.text = widget.initialContact!.lastName;
+      _emailController.text = widget.initialContact!.email;
+      _phoneController.value = PhoneNumber.parse(widget.initialContact!.phone);
+
+      if (widget.initialContact!.companyId != null) {
+        Future.microtask(() async {
+          final companyRepository = ref.read(companyRepositoryProvider);
+          _selectedCompany = await companyRepository.getCompanyById(widget.initialContact!.companyId!);
+          setState(() {});
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,33 +108,26 @@ class ContactFormState extends ConsumerState<ContactForm> {
                         log("Scanned Text: $value");
                         final String scannedText = value.toLowerCase();
 
-                        // Split into lines first, then words
                         List<String> lines = scannedText.split('\n');
                         List<String> allWords = [];
 
-                        // Collect all words from all lines
                         for (var line in lines) {
                           allWords.addAll(line.trim().split(' ').where((w) => w.isNotEmpty));
                         }
 
-                        // Try to find first name and last name
                         if (_lastNameController.text.isEmpty && _firstNameController.text.isEmpty) {
-                          // On ne garde que les tokens 100% alphabétiques (lettres et accents)
                           final nameWords = allWords.where((w) => RegExp(r'^[A-Za-zÀ-ÖØ-öø-ÿ]+$').hasMatch(w)).toList();
 
                           String? detectedFirstName;
                           String? detectedLastName;
 
-                          // On teste toutes les paires (ou triplets si tu veux gérer 3 mots)
                           for (int i = 0; i < nameWords.length - 1; i++) {
                             final w1 = nameWords[i];
                             final w2 = nameWords[i + 1];
 
-                            // 1) Prénom en Title Case et nom en UPPERCASE
                             final isFirstName = RegExp(r'^[A-Z][a-zà-öø-ÿ]+$').hasMatch(w1);
                             final isLastName = RegExp(r'^[A-ZÀ-ÖØ-Ÿ]{2,}$').hasMatch(w2);
 
-                            // 2) Ou les deux en Title Case (cas de « Jean Dupont »)
                             final bothTitleCase = RegExp(r'^[A-Z][a-zà-öø-ÿ]+$').hasMatch(w1) && RegExp(r'^[A-Z][a-zà-öø-ÿ]+$').hasMatch(w2);
 
                             if ((isFirstName && isLastName) || bothTitleCase) {
@@ -127,7 +143,6 @@ class ContactFormState extends ConsumerState<ContactForm> {
                           }
                         }
 
-                        // Try to find email
                         if (_emailController.text.isEmpty) {
                           for (var line in lines) {
                             final emailMatch = RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b').firstMatch(line);
@@ -138,10 +153,8 @@ class ContactFormState extends ConsumerState<ContactForm> {
                           }
                         }
 
-                        // Try to find phone number
                         if (_phoneController.value.nsn.isEmpty) {
                           for (var line in lines) {
-                            // Pattern for French numbers: supports formats like 06.59.34.27.17, 06 59 34 27 17, 0659342717
                             final phoneMatch = RegExp(r'(\+33|0)[\s.-]?[1-9][\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}').firstMatch(line);
                             if (phoneMatch != null) {
                               final phone = phoneMatch.group(0)!.replaceAll(RegExp(r'[\s.-]'), '');
@@ -161,7 +174,6 @@ class ContactFormState extends ConsumerState<ContactForm> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    // Take picture button
                     FilledButton.icon(
                       onPressed: () async {
                         LoadingOverlay.of(context).show();
@@ -175,7 +187,6 @@ class ContactFormState extends ConsumerState<ContactForm> {
                       label: const Text("Prendre une photo"),
                     ),
                     const SizedBox(width: 8),
-                    // Stop scanning button
                     OutlinedButton.icon(
                       onPressed: () {
                         setState(() {
@@ -206,11 +217,6 @@ class ContactFormState extends ConsumerState<ContactForm> {
                 ),
                 const SizedBox(height: 12),
               ],
-              // Text(
-              //   key: UniqueKey(),
-              //   "Resultat de la reconnaissance : $_ocrTextResult",
-              // ),
-              // const SizedBox(height: 12),
               Flexible(
                 child: Row(
                   children: [
@@ -236,6 +242,46 @@ class ContactFormState extends ConsumerState<ContactForm> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SearchableDropdown<Company>(
+                label: "Entreprise (optionnelle)",
+                value: _selectedCompany,
+                isRequired: false,
+                displayStringForOption: (company) => company.name,
+                optionsBuilder: (textValue) async {
+                  if (textValue.text.isEmpty) {
+                    final companies = await ref.read(companiesProvider.future);
+                    return companies;
+                  }
+
+                  final companies = await ref.read(
+                    companySearchProvider(textValue.text).future,
+                  );
+                  return companies;
+                },
+                onSelected: (company) {
+                  setState(() {
+                    _selectedCompany = company;
+                  });
+                },
+                onCreate: (companyName) async {
+                  final companyRepository = ref.read(companyRepositoryProvider);
+                  final newCompany = await companyRepository.createCompany(
+                    Company(name: companyName),
+                  );
+                  setState(() {
+                    _selectedCompany = newCompany;
+                  });
+
+                  if (context.mounted) {
+                    SuccessSnackbar.show(context, "Entreprise créée avec succès");
+                  }
+                },
+                fakeOnCreate: (value) => Company(
+                  id: -1,
+                  name: value,
                 ),
               ),
               const SizedBox(height: 12),
@@ -277,14 +323,21 @@ class ContactFormState extends ConsumerState<ContactForm> {
         lastName: _lastNameController.text,
         email: _emailController.text,
         phone: _phoneController.value.international,
+        companyId: _selectedCompany?.id,
         imageBase64: _image != null ? base64Encode(_image!) : null,
       );
 
       final ContactRepository contactRepository = ref.read(contactRepositoryProvider);
       final EventRepository eventRepository = ref.read(eventRepositoryProvider);
-      newContact = await contactRepository.createContact(newContact);
-      if (widget.event != null) {
-        await eventRepository.addContactToEvent(widget.event!.id!, newContact.id!);
+
+      if (widget.initialContact != null) {
+        newContact = newContact.copyWith(id: widget.initialContact!.id);
+        await contactRepository.updateContact(newContact);
+      } else {
+        newContact = await contactRepository.createContact(newContact);
+        if (widget.event != null) {
+          await eventRepository.addContactToEvent(widget.event!.id!, newContact.id!);
+        }
       }
 
       final phc.Contact? existingContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(newContact.phone);

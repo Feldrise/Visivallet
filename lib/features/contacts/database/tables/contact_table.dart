@@ -8,6 +8,7 @@ class ContactTable {
   static const String columnLastName = 'last_name';
   static const String columnEmail = 'email';
   static const String columnPhone = 'phone';
+  static const String columnCompanyId = 'company_id';
 
   static String createTable() {
     return '''
@@ -16,7 +17,9 @@ class ContactTable {
         $columnFirstName TEXT NOT NULL,
         $columnLastName TEXT NOT NULL,
         $columnEmail TEXT NOT NULL,
-        $columnPhone TEXT NOT NULL
+        $columnPhone TEXT NOT NULL,
+        $columnCompanyId INTEGER,
+        FOREIGN KEY ($columnCompanyId) REFERENCES companies(id) ON DELETE SET NULL
       )
     ''';
   }
@@ -28,6 +31,7 @@ class ContactTable {
       columnLastName: contact.lastName,
       columnEmail: contact.email,
       columnPhone: contact.phone,
+      columnCompanyId: contact.companyId,
     };
   }
 
@@ -38,6 +42,7 @@ class ContactTable {
       lastName: map[columnLastName] as String,
       email: map[columnEmail] as String,
       phone: map[columnPhone] as String,
+      companyId: map[columnCompanyId] as int?,
     );
   }
 }

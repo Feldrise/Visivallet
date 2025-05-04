@@ -17,10 +17,13 @@ abstract class Contact with _$Contact {
     required String lastName,
     required String email,
     required String phone,
+    int? companyId,
     String? imageBase64,
   }) = _Contact;
 
   factory Contact.fromJson(Map<String, Object?> json) => _$ContactFromJson(json);
+
+  String get displayName => "$firstName $lastName";
 
   Future<Uint8List?> getImage() async {
     final Directory directory = await getApplicationDocumentsDirectory();

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:visivallet/core/providers.dart';
 import 'package:visivallet/features/contacts/add_contact_page/add_contact_page.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
+import 'package:visivallet/features/contacts/scan_qr_page/scan_qr_page.dart';
 import 'package:visivallet/features/contacts/widgets/contacts_list.dart';
 import 'package:visivallet/theme/screen_helper.dart';
 
@@ -35,12 +36,31 @@ class _ContactsPageState extends ConsumerState<ContactsPage> {
     });
   }
 
+  Future<void> _scanQRCode() async {
+    final Contact? contact = await Navigator.of(context).push<Contact?>(
+      MaterialPageRoute<Contact?>(
+        builder: (context) => const ScanQRPage(),
+      ),
+    );
+
+    if (contact != null) {
+      ref.invalidate(contactsProvider);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Contacts"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: _scanQRCode,
+            tooltip: "Scanner un QR Code",
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

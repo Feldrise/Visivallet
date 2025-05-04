@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:visivallet/core/dialogs/confirmation_dialog.dart';
+import 'package:visivallet/core/providers.dart';
 import 'package:visivallet/core/widgets/loading_overlay.dart';
 import 'package:visivallet/core/widgets/success_snackbar.dart';
+import 'package:visivallet/core/widgets/error_snackbar.dart';
 import 'package:visivallet/features/company/providers/company_provider.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
 import 'package:visivallet/features/contacts/services/contact_sharing_service.dart';
+import 'package:visivallet/features/contacts/database/repositories/contact_repository.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as phc;
 
 class ContactCard extends ConsumerWidget {
   const ContactCard({
     super.key,
     required this.contact,
+    this.onUpdated,
   });
 
   final Contact contact;
+  final Function()? onUpdated;
 
   Future<void> _addToContacts(BuildContext context, WidgetRef ref) async {
     LoadingOverlay.of(context).show();
@@ -31,6 +37,7 @@ class ContactCard extends ConsumerWidget {
 
       await ref.read(phoneContactsProvider.notifier).addContact(newContact);
 
+      onUpdated?.call();
       if (context.mounted) {
         SuccessSnackbar.show(context, "Contact ajouté à votre répertoire");
       }
@@ -47,6 +54,49 @@ class ContactCard extends ConsumerWidget {
       await ref.read(contactSharingServiceProvider).shareContact(contact);
       if (context.mounted) {
         SuccessSnackbar.show(context, "Contact partagé avec succès");
+      }
+    } finally {
+      if (context.mounted) {
+        LoadingOverlay.of(context).hide();
+      }
+    }
+  }
+
+  Future<void> _deleteContact(BuildContext context, WidgetRef ref) async {
+    if (contact.id == null) {
+      ErrorSnackbar.show(context, "Impossible de supprimer ce contact");
+      return;
+    }
+
+    final bool confirmed = await showDialog<bool?>(
+          context: context,
+          builder: (context) => ConfirmationDialog(
+            title: "Supprimer le contact",
+            content: "Êtes-vous sûr de vouloir supprimer le contact ${contact.firstName} ${contact.lastName} ? Cette action est irréversible.",
+            isDeletationConfirmation: true,
+          ),
+        ) ??
+        false;
+
+    if (!confirmed) return;
+
+    if (context.mounted) {
+      LoadingOverlay.of(context).show();
+    }
+    try {
+      final contactRepository = ref.read(contactDataSourceProvider);
+      await contactRepository.deleteContact(contact.id!);
+
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      onUpdated?.call();
+      if (context.mounted) {
+        SuccessSnackbar.show(context, "Contact supprimé avec succès");
+        ref.invalidate(contactsProvider);
+        ref.invalidate(eventContactsProvider);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ErrorSnackbar.show(context, "Erreur lors de la suppression : $e");
       }
     } finally {
       if (context.mounted) {
@@ -130,6 +180,11 @@ class ContactCard extends ConsumerWidget {
                     leadingIcon: const Icon(Icons.person_add_outlined),
                     child: const Text("Ajouter aux contacts"),
                   ),
+                MenuItemButton(
+                  onPressed: () => _deleteContact(context, ref),
+                  leadingIcon: const Icon(Icons.delete),
+                  child: const Text("Supprimer"),
+                ),
               ],
               builder: (context, menuController, child) {
                 return IconButton(

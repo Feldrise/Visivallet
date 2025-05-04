@@ -36,8 +36,10 @@ class _ContactsListState extends ConsumerState<ContactsList> {
   @override
   void initState() {
     super.initState();
-    // Load contacts initially
-    _loadContacts();
+    // Defer loading contacts to after the widget is fully initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadContacts();
+    });
   }
 
   @override
@@ -56,6 +58,25 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     });
 
     try {
+      // Invalidate all contact providers to ensure fresh data
+      if (widget.event == null) {
+        if ((widget.searchQuery ?? "").isEmpty) {
+          ref.invalidate(contactsProvider);
+        } else {
+          ref.invalidate(filteredContactsProvider(widget.searchQuery!));
+        }
+      } else {
+        if ((widget.searchQuery ?? "").isEmpty) {
+          ref.invalidate(eventContactsProvider(widget.event!.id!));
+        } else {
+          ref.invalidate(filteredEventContactsProvider({
+            "eventId": widget.event!.id!,
+            "filter": widget.searchQuery!,
+          }));
+        }
+      }
+
+      // Now fetch the data from the refreshed providers
       final contactsFuture = widget.event == null
           ? (widget.searchQuery ?? "").isEmpty
               ? ref.read(contactsProvider.future)
@@ -201,7 +222,15 @@ class _ContactsListState extends ConsumerState<ContactsList> {
                     },
                     child: Stack(
                       children: [
-                        ContactCard(contact: contact),
+                        ContactCard(
+                          contact: contact,
+                          onUpdated: () {
+                            setState(() {
+                              _cachedContacts = null; // Invalidate cached contacts to force reload
+                            });
+                            _loadContacts();
+                          },
+                        ),
                         if (_selectionMode)
                           Positioned(
                             right: 8,

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -87,6 +88,46 @@ class ContactSharingService {
     vCard.writeln('END:VCARD');
 
     return vCard.toString();
+  }
+
+  /// Generate QR code data for a contact
+  String generateQRData(Contact contact) {
+    // Create a simple map with contact data
+    final Map<String, dynamic> contactMap = {
+      'firstName': contact.firstName,
+      'lastName': contact.lastName,
+      'email': contact.email,
+      'phone': contact.phone,
+      'companyId': contact.companyId,
+      'imageBase64': contact.imageBase64,
+      'qrCodeType': 'visivallet-contact',
+    };
+
+    // Convert to JSON and return as the QR code data
+    return jsonEncode(contactMap);
+  }
+
+  /// Parse contact data from QR code
+  Contact? parseContactQRData(String qrData) {
+    try {
+      final Map<String, dynamic> contactMap = jsonDecode(qrData) as Map<String, dynamic>;
+
+      // Verify this is a valid Visivallet contact QR code
+      if (contactMap['qrCodeType'] != 'visivallet-contact') {
+        return null;
+      }
+
+      // Create and return a contact from the map
+      return Contact(
+        firstName: (contactMap['firstName'] as String?) ?? '',
+        lastName: (contactMap['lastName'] as String?) ?? '',
+        email: (contactMap['email'] as String?) ?? '',
+        phone: (contactMap['phone'] as String?) ?? '',
+        imageBase64: ((contactMap['imageBase64'] as String?) ?? '').isNotEmpty ? contactMap['imageBase64'] as String? : null,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 }
 

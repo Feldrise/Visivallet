@@ -5,6 +5,7 @@ import 'package:visivallet/core/widgets/success_snackbar.dart';
 import 'package:visivallet/features/company/providers/company_provider.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
+import 'package:visivallet/features/contacts/services/contact_sharing_service.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as phc;
 
 class ContactCard extends ConsumerWidget {
@@ -14,6 +15,45 @@ class ContactCard extends ConsumerWidget {
   });
 
   final Contact contact;
+
+  Future<void> _addToContacts(BuildContext context, WidgetRef ref) async {
+    LoadingOverlay.of(context).show();
+
+    try {
+      final phc.Contact newContact = phc.Contact(
+        displayName: "${contact.firstName} ${contact.lastName}",
+        name: phc.Name(
+          first: contact.firstName,
+          last: contact.lastName,
+        ),
+        phones: [phc.Phone(contact.phone)],
+      );
+
+      await ref.read(phoneContactsProvider.notifier).addContact(newContact);
+
+      if (context.mounted) {
+        SuccessSnackbar.show(context, "Contact ajouté à votre répertoire");
+      }
+    } finally {
+      if (context.mounted) {
+        LoadingOverlay.of(context).hide();
+      }
+    }
+  }
+
+  Future<void> _shareContact(BuildContext context, WidgetRef ref) async {
+    LoadingOverlay.of(context).show();
+    try {
+      await ref.read(contactSharingServiceProvider).shareContact(contact);
+      if (context.mounted) {
+        SuccessSnackbar.show(context, "Contact partagé avec succès");
+      }
+    } finally {
+      if (context.mounted) {
+        LoadingOverlay.of(context).hide();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,30 +117,33 @@ class ContactCard extends ConsumerWidget {
                   )
                 : Text("${contact.firstName} ${contact.lastName}"),
             subtitle: Text(contact.email),
-            trailing: phoneContact == null
-                ? IconButton(
-                    onPressed: () async {
-                      LoadingOverlay.of(context).show();
-
-                      final phc.Contact newContact = phc.Contact(
-                        displayName: "${contact.firstName} ${contact.lastName}",
-                        name: phc.Name(
-                          first: contact.firstName,
-                          last: contact.lastName,
-                        ),
-                        phones: [phc.Phone(contact.phone)],
-                      );
-
-                      await ref.read(phoneContactsProvider.notifier).addContact(newContact);
-
-                      if (context.mounted) {
-                        LoadingOverlay.of(context).hide();
-                        SuccessSnackbar.show(context, "Contact ajouté à votre répertoire");
-                      }
-                    },
-                    icon: const Icon(Icons.person_add_outlined),
-                  )
-                : null,
+            trailing: MenuAnchor(
+              menuChildren: [
+                MenuItemButton(
+                  onPressed: () => _shareContact(context, ref),
+                  leadingIcon: const Icon(Icons.share),
+                  child: const Text("Partager"),
+                ),
+                if (phoneContact == null)
+                  MenuItemButton(
+                    onPressed: () => _addToContacts(context, ref),
+                    leadingIcon: const Icon(Icons.person_add_outlined),
+                    child: const Text("Ajouter aux contacts"),
+                  ),
+              ],
+              builder: (context, menuController, child) {
+                return IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () {
+                    if (menuController.isOpen) {
+                      menuController.close();
+                    } else {
+                      menuController.open();
+                    }
+                  },
+                );
+              },
+            ),
             onTap: () {
               // Handle contact tap
             },

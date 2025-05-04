@@ -51,32 +51,66 @@ class _ContactsListState extends ConsumerState<ContactsList> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set up listeners for provider changes
+    _setupProviderListeners();
+  }
+
+  void _setupProviderListeners() {
+    // Remove this method call if you experience excessive rebuilds
+    // Instead of listeners, you could use ref.listen in the build method
+    if (widget.event == null) {
+      if ((widget.searchQuery ?? "").isEmpty) {
+        ref.listenManual(contactsProvider, (previous, next) {
+          if (next.valueOrNull != null && next.hasValue) {
+            _refreshContactsList();
+          }
+        });
+      } else {
+        ref.listenManual(filteredContactsProvider(widget.searchQuery!), (previous, next) {
+          if (next.valueOrNull != null && next.hasValue) {
+            _refreshContactsList();
+          }
+        });
+      }
+    } else {
+      if ((widget.searchQuery ?? "").isEmpty) {
+        ref.listenManual(eventContactsProvider(widget.event!.id!), (previous, next) {
+          if (next.valueOrNull != null && next.hasValue) {
+            _refreshContactsList();
+          }
+        });
+      } else {
+        ref.listenManual(
+            filteredEventContactsProvider({
+              "eventId": widget.event!.id!,
+              "filter": widget.searchQuery!,
+            }), (previous, next) {
+          if (next.valueOrNull != null && next.hasValue) {
+            _refreshContactsList();
+          }
+        });
+      }
+    }
+  }
+
+  void _refreshContactsList() {
+    if (!mounted) return;
+    _loadContacts();
+  }
+
   Future<void> _loadContacts() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      // Invalidate all contact providers to ensure fresh data
-      if (widget.event == null) {
-        if ((widget.searchQuery ?? "").isEmpty) {
-          ref.invalidate(contactsProvider);
-        } else {
-          ref.invalidate(filteredContactsProvider(widget.searchQuery!));
-        }
-      } else {
-        if ((widget.searchQuery ?? "").isEmpty) {
-          ref.invalidate(eventContactsProvider(widget.event!.id!));
-        } else {
-          ref.invalidate(filteredEventContactsProvider({
-            "eventId": widget.event!.id!,
-            "filter": widget.searchQuery!,
-          }));
-        }
-      }
-
-      // Now fetch the data from the refreshed providers
+      // Now fetch the data from the providers
       final contactsFuture = widget.event == null
           ? (widget.searchQuery ?? "").isEmpty
               ? ref.read(contactsProvider.future)

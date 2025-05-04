@@ -38,7 +38,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _lastNameController.text = preferences.getString('lastName') ?? '';
     _emailController.text = preferences.getString('email') ?? '';
     _phoneController.value = PhoneNumber(isoCode: IsoCode.FR, nsn: preferences.getString('phone') ?? '');
-    _profileImage = preferences.getString('profileImage') != null ? base64Decode(preferences.getString('profileImage')!) : null;
+    _profileImage = _profileImage ?? (preferences.getString('profileImage') != null ? base64Decode(preferences.getString('profileImage')!) : null);
   }
 
   Future<void> _changeTheme(ThemeMode themeMode) async {

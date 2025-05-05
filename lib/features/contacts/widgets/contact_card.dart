@@ -11,6 +11,7 @@ import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
 import 'package:visivallet/features/contacts/services/contact_sharing_service.dart';
 import 'package:visivallet/features/contacts/database/repositories/contact_repository.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as phc;
+import 'package:visivallet/features/contacts/widgets/contact_details_dialog.dart';
 
 class ContactCard extends ConsumerWidget {
   const ContactCard({
@@ -105,6 +106,18 @@ class ContactCard extends ConsumerWidget {
     }
   }
 
+  Future<void> _showContactDetails(BuildContext context) async {
+    await showDialog<Object?>(
+      context: context,
+      builder: (context) => LoadingOverlay(
+        child: ContactDetailsDialog(
+          contact: contact,
+          onUpdated: onUpdated,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final phc.Contact? phoneContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(contact.phone);
@@ -117,39 +130,42 @@ class ContactCard extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: FutureBuilder(
-                future: contact.getImage(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
+          InkWell(
+            onTap: () => _showContactDetails(context),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: FutureBuilder(
+                  future: contact.getImage(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
 
-                  if (snapshot.hasError) {
-                    return Container(
-                      color: Theme.of(context).colorScheme.surfaceContainer,
-                      padding: const EdgeInsets.all(8.0),
-                      child: const Icon(Icons.error),
+                    if (snapshot.hasError) {
+                      return Container(
+                        color: Theme.of(context).colorScheme.surfaceContainer,
+                        padding: const EdgeInsets.all(8.0),
+                        child: const Icon(Icons.error),
+                      );
+                    }
+
+                    if (!snapshot.hasData) {
+                      return Container(
+                        color: Theme.of(context).colorScheme.surfaceDim,
+                        padding: const EdgeInsets.all(16.0),
+                        height: 150,
+                        child: const Icon(Icons.image_not_supported),
+                      );
+                    }
+
+                    return Image.memory(
+                      snapshot.data!,
+                      fit: BoxFit.cover,
+                      height: 200,
+                      width: double.infinity,
                     );
-                  }
-
-                  if (!snapshot.hasData) {
-                    return Container(
-                      color: Theme.of(context).colorScheme.surfaceDim,
-                      padding: const EdgeInsets.all(16.0),
-                      height: 150,
-                      child: const Icon(Icons.image_not_supported),
-                    );
-                  }
-
-                  return Image.memory(
-                    snapshot.data!,
-                    fit: BoxFit.cover,
-                    height: 200,
-                    width: double.infinity,
-                  );
-                }),
+                  }),
+            ),
           ),
           ListTile(
             title: companyState != null
@@ -199,9 +215,7 @@ class ContactCard extends ConsumerWidget {
                 );
               },
             ),
-            onTap: () {
-              // Handle contact tap
-            },
+            onTap: () => _showContactDetails(context),
           ),
         ],
       ),

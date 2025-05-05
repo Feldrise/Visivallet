@@ -7,7 +7,7 @@ import 'package:visivallet/features/company/providers/company_provider.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
 import 'package:visivallet/features/contacts/services/contact_sharing_service.dart';
-import 'package:flutter_contacts/flutter_contacts.dart' as phc;
+import 'package:visivallet/features/contacts/services/phone_contacts_service.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class ContactDetailsDialog extends ConsumerWidget {
@@ -24,17 +24,8 @@ class ContactDetailsDialog extends ConsumerWidget {
     LoadingOverlay.of(context).show();
 
     try {
-      final phc.Contact newContact = phc.Contact(
-        displayName: "${contact.firstName} ${contact.lastName}",
-        name: phc.Name(
-          first: contact.firstName,
-          last: contact.lastName,
-        ),
-        phones: [phc.Phone(contact.phone)],
-        emails: [phc.Email(contact.email)],
-      );
-
-      await ref.read(phoneContactsProvider.notifier).addContact(newContact);
+      // Use the dedicated service to add the contact to the phone
+      await ref.read(phoneContactsServiceProvider).addContactToPhone(contact);
 
       onUpdated?.call();
       if (context.mounted) {
@@ -101,7 +92,9 @@ class ContactDetailsDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final contactSharingService = ref.read(contactSharingServiceProvider);
     final qrData = contactSharingService.generateQRData(contact);
-    final phoneContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(contact.phone);
+
+    // Use the service to check if the contact exists in phone
+    final bool contactExistsInPhone = ref.read(phoneContactsServiceProvider).contactExistsInPhone(contact);
 
     // Get company if companyId is available
     final companyState = contact.companyId != null ? ref.watch(companyByIdProvider(contact.companyId!)) : null;
@@ -273,7 +266,7 @@ class ContactDetailsDialog extends ConsumerWidget {
                         onPressed: () => _shareContact(context, ref),
                         primary: true,
                       ),
-                      if (phoneContact == null)
+                      if (!contactExistsInPhone)
                         _buildActionButton(
                           context: context,
                           icon: Icons.person_add_outlined,

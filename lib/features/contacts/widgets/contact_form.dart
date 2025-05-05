@@ -18,6 +18,7 @@ import 'package:visivallet/features/company/providers/company_provider.dart';
 import 'package:visivallet/features/contacts/database/repositories/contact_repository.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
+import 'package:visivallet/features/contacts/services/phone_contacts_service.dart';
 import 'package:visivallet/features/event/database/repositories/event_repository.dart';
 import 'package:visivallet/features/event/models/event/event.dart';
 import 'package:visivallet/theme/screen_helper.dart';
@@ -340,9 +341,10 @@ class ContactFormState extends ConsumerState<ContactForm> {
         }
       }
 
-      final phc.Contact? existingContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(newContact.phone);
+      // Check if the contact already exists in phone contacts using the service
+      final bool contactExists = ref.read(phoneContactsServiceProvider).contactExistsInPhone(newContact);
 
-      if (existingContact == null && mounted) {
+      if (!contactExists && mounted) {
         final bool shouldAddToContact = await showDialog<bool?>(
               context: context,
               builder: (context) => ConfirmationDialog(
@@ -354,16 +356,8 @@ class ContactFormState extends ConsumerState<ContactForm> {
             false;
 
         if (shouldAddToContact) {
-          final phc.Contact newPhoneContact = phc.Contact(
-            displayName: "${newContact.firstName} ${newContact.lastName}",
-            name: phc.Name(
-              first: newContact.firstName,
-              last: newContact.lastName,
-            ),
-            phones: [phc.Phone(newContact.phone)],
-          );
-
-          await ref.read(phoneContactsProvider.notifier).addContact(newPhoneContact);
+          // Use the dedicated service to add the contact to the phone
+          await ref.read(phoneContactsServiceProvider).addContactToPhone(newContact);
 
           if (mounted) {
             SuccessSnackbar.show(context, "Contact ajouté à votre répertoire");

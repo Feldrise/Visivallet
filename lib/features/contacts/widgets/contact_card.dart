@@ -9,6 +9,7 @@ import 'package:visivallet/features/company/providers/company_provider.dart';
 import 'package:visivallet/features/contacts/models/contact/contact.dart';
 import 'package:visivallet/features/contacts/phone_contacts_provider.dart';
 import 'package:visivallet/features/contacts/services/contact_sharing_service.dart';
+import 'package:visivallet/features/contacts/services/phone_contacts_service.dart';
 import 'package:visivallet/features/contacts/database/repositories/contact_repository.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as phc;
 import 'package:visivallet/features/contacts/widgets/contact_details_dialog.dart';
@@ -27,16 +28,8 @@ class ContactCard extends ConsumerWidget {
     LoadingOverlay.of(context).show();
 
     try {
-      final phc.Contact newContact = phc.Contact(
-        displayName: "${contact.firstName} ${contact.lastName}",
-        name: phc.Name(
-          first: contact.firstName,
-          last: contact.lastName,
-        ),
-        phones: [phc.Phone(contact.phone)],
-      );
-
-      await ref.read(phoneContactsProvider.notifier).addContact(newContact);
+      // Use the dedicated service
+      await ref.read(phoneContactsServiceProvider).addContactToPhone(contact);
 
       onUpdated?.call();
       if (context.mounted) {
@@ -120,7 +113,8 @@ class ContactCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final phc.Contact? phoneContact = ref.read(phoneContactsProvider.notifier).getContactByPhoneNumber(contact.phone);
+    // Use the phoneContactsService to check if contact exists in phone
+    final bool contactInPhone = ref.read(phoneContactsServiceProvider).contactExistsInPhone(contact);
 
     // Get company if companyId is available
     final companyState = contact.companyId != null ? ref.watch(companyByIdProvider(contact.companyId!)) : null;
@@ -190,7 +184,7 @@ class ContactCard extends ConsumerWidget {
                   leadingIcon: const Icon(Icons.share),
                   child: const Text("Partager"),
                 ),
-                if (phoneContact == null)
+                if (!contactInPhone)
                   MenuItemButton(
                     onPressed: () => _addToContacts(context, ref),
                     leadingIcon: const Icon(Icons.person_add_outlined),

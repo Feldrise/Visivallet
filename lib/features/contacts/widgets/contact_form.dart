@@ -51,6 +51,7 @@ class ContactFormState extends ConsumerState<ContactForm> {
   Company? _selectedCompany;
   bool _shouldScan = false;
   Uint8List? _image;
+  bool _isVerticalCard = false; // Controls the card orientation (vertical/horizontal)
 
   @override
   void initState() {
@@ -86,19 +87,47 @@ class ContactFormState extends ConsumerState<ContactForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (_shouldScan) ...[
+                // Orientation toggle for card scanning
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SegmentedButton<bool>(
+                      segments: const [
+                        ButtonSegment<bool>(
+                          value: false,
+                          label: Text('Horizontale'),
+                          icon: Icon(Icons.crop_landscape),
+                        ),
+                        ButtonSegment<bool>(
+                          value: true,
+                          label: Text('Verticale'),
+                          icon: Icon(Icons.crop_portrait),
+                        ),
+                      ],
+                      selected: {_isVerticalCard},
+                      onSelectionChanged: (Set<bool> newSelection) {
+                        setState(() {
+                          _isVerticalCard = newSelection.first;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 SizedBox(
-                  height: 260,
+                  height: _isVerticalCard ? 460 : 260,
                   child: ScalableOCR(
                     key: _ocrKey,
+                    lockCamera: false,
                     paintboxCustom: Paint()
                       ..style = PaintingStyle.stroke
                       ..strokeWidth = 4.0
                       ..color = const Color.fromARGB(153, 102, 160, 241),
-                    boxLeftOff: 10,
-                    boxBottomOff: 10,
-                    boxRightOff: 10,
-                    boxTopOff: 10,
-                    boxHeight: 200,
+                    boxLeftOff: _isVerticalCard ? 10 : 10,
+                    boxBottomOff: _isVerticalCard ? 10 : 10,
+                    boxRightOff: _isVerticalCard ? 10 : 10,
+                    boxTopOff: _isVerticalCard ? 10 : 10,
+                    boxHeight: _isVerticalCard ? 400 : 200,
                     getRawData: (List<dynamic> value) {
                       for (var element in value) {
                         log("Element: ${element.text}");
